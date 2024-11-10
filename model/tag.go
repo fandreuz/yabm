@@ -14,10 +14,11 @@ func NewTag(label string, creationDate uint64) Tag {
 }
 
 func (t Tag) String() string {
+	content := fmt.Sprintf("label: '%s', creationDate: '%d'", t.Label, t.CreationDate)
 	if t.Id != nil {
-		return fmt.Sprintf("{label: '%s', creationDate: '%d', id: '%d'}", t.Label, t.CreationDate, *(t.Id))
+		return fmt.Sprintf("{%s, id: '%d'}", content, *(t.Id))
 	}
-	return fmt.Sprintf("{label: '%s', creationDate: '%d'}", t.Label, t.CreationDate)
+	return fmt.Sprintf("{%s}", content)
 }
 
 func (t Tag) WithId(id uint64) Tag {

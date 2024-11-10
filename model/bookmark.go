@@ -17,10 +17,11 @@ func NewBookmark(url string, creationDate uint64) Bookmark {
 }
 
 func (b Bookmark) String() string {
+	content := fmt.Sprintf("url: '%s', title: '%v', creationDate: '%d'", b.Url, b.Title, b.CreationDate)
 	if b.Id != nil {
-		return fmt.Sprintf("{url: '%s', title: '%v', creationDate: '%d', id: '%d'}", b.Url, b.Title, b.CreationDate, *(b.Id))
+		return fmt.Sprintf("{%s, id: '%d'}", content, *(b.Id))
 	}
-	return fmt.Sprintf("{url: '%s', title: '%v', creationDate: '%d'}", b.Url, b.Title, b.CreationDate)
+	return fmt.Sprintf("{%s}", content)
 }
 
 func (b Bookmark) WithId(id uint64) Bookmark {
