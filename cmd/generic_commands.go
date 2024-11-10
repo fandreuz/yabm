@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func MakeShowCommand[E fmt.Stringer](extractor func(uint64) (*E, error)) (*cobra.Command) {
+func MakeShowCommand[E fmt.Stringer](extractor func(uint64) (E, error)) (*cobra.Command) {
 	return &cobra.Command{
 		Use:   "show",
 		Short: "Show details for a specific entity",

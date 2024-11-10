@@ -2,44 +2,31 @@ package model
 
 import (
 	"context"
-	"time"
+
+	"github.com/jackc/pgx/v5"
 )
 
-func GetBookmarkById(id uint64) (*Bookmark, error) {
-	conn, connError := openConnection()
-	if connError != nil {
-		return nil, connError
-	}
-	defer conn.Close(context.TODO())
-
-	sqlQuery := "select url, title, creationDate from bookmarks where id=$1"
-
-	var url string
-	var title string
-	var creationDate time.Time
-	queryErr := conn.QueryRow(context.TODO(), sqlQuery, id).Scan(&url, &title, &creationDate)
-	if queryErr != nil {
-		return nil, queryErr
-	}
-
-	return &Bookmark{Url: url, Title: title, CreationDate: creationDate, Id: id}, nil
+func GetBookmarkById(id uint64) (Bookmark, error) {
+	return getById[Bookmark]("select * from bookmarks where id=$1", id)
 }
 
-func GetTagById(id uint64) (*Tag, error) {
+func GetTagById(id uint64) (Tag, error) {
+	return getById[Tag]("select * from tags where id=$1", id)
+}
+
+func getById[E any](sqlQuery string, id uint64) (E, error) {
+	var errorEntity E
+
 	conn, connError := openConnection()
 	if connError != nil {
-		return nil, connError
+		return errorEntity, connError
 	}
 	defer conn.Close(context.TODO())
 
-	sqlQuery := "select label, creationDate from tags where id=$1"
-
-	var label string
-	var creationDate time.Time
-	queryErr := conn.QueryRow(context.TODO(), sqlQuery, id).Scan(&label, &creationDate)
+	rows, queryErr := conn.Query(context.TODO(), sqlQuery, id)
 	if queryErr != nil {
-		return nil, queryErr
+		return errorEntity, queryErr
 	}
 
-	return &Tag{Label: label, CreationDate: creationDate, Id: id}, nil
+	return pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[E])
 }

@@ -7,11 +7,11 @@ import (
 )
 
 func ListBookmarks() ([]Bookmark, error) {
-	return listEntities[Bookmark]("select id, url, title, creationDate from bookmarks")
+	return listEntities[Bookmark]("select * from bookmarks")
 }
 
 func ListTags() ([]Tag, error) {
-	return listEntities[Tag]("select id, label, creationDate from tags")
+	return listEntities[Tag]("select * from tags")
 }
 
 func listEntities[E any](sqlQuery string) ([]E, error) {
