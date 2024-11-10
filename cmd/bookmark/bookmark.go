@@ -19,4 +19,6 @@ func Execute() {
 }
 
 func init() {
+	BookmarkCmd.AddCommand(ListCmd)
+	BookmarkCmd.AddCommand(ShowCmd)
 }
