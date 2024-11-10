@@ -14,6 +14,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "yabm",
 	Short: "Simple command-line bookmark manager",
+	SilenceUsage: true,
 }
 
 func Execute() {

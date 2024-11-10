@@ -1,4 +1,4 @@
-package bookmark
+package tag
 
 import (
 	"fmt"
@@ -11,12 +11,12 @@ var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List saved bookmarks",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		bookmarks, err := model.ListBookmarks()
+		tags, err := model.ListTags()
 		if err != nil {
 			return err
 		}
 
-		for _, b := range bookmarks {
+		for _, b := range tags {
 			fmt.Println(b)
 		}
 		
