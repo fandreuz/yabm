@@ -16,8 +16,8 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		for _, b := range tags {
-			fmt.Println(b)
+		for idx, t := range tags {
+			fmt.Printf("%d -- %v\n", idx, t)
 		}
 		
 		return nil

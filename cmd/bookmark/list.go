@@ -16,8 +16,8 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		for _, b := range bookmarks {
-			fmt.Println(b)
+		for idx, b := range bookmarks {
+			fmt.Printf("%d -- %v\n", idx, b)
 		}
 		
 		return nil
