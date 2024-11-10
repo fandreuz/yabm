@@ -1,7 +1,7 @@
 create table bookmarks (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY NOT NULL,
     url text NOT NULL,
-    title text,
+    title text NOT NULL,
     creationDate bigint NOT NULL
 );
 
