@@ -7,31 +7,19 @@ import (
 )
 
 func ListBookmarks() ([]Bookmark, error) {
-	conn, connError := openConnection()
-	if connError != nil {
-		return nil, connError
-	}
-	defer conn.Close(context.TODO())
-
-    sqlQuery := "select id, url, title, creationDate from bookmarks"
-
-	rows, queryErr := conn.Query(context.TODO(), sqlQuery)
-	if queryErr != nil {
-		return nil, queryErr
-	}
-	defer rows.Close()
-
-	return pgx.CollectRows(rows, pgx.RowToStructByName[Bookmark])
+	return listEntities[Bookmark]("select id, url, title, creationDate from bookmarks")
 }
 
 func ListTags() ([]Tag, error) {
+	return listEntities[Tag]("select id, label, creationDate from tags")
+}
+
+func listEntities[E any](sqlQuery string) ([]E, error) {
 	conn, connError := openConnection()
 	if connError != nil {
 		return nil, connError
 	}
 	defer conn.Close(context.TODO())
-
-    sqlQuery := "select id, label, creationDate from tags"
 
 	rows, queryErr := conn.Query(context.TODO(), sqlQuery)
 	if queryErr != nil {
@@ -39,5 +27,5 @@ func ListTags() ([]Tag, error) {
 	}
 	defer rows.Close()
 
-	return pgx.CollectRows(rows, pgx.RowToStructByName[Tag])
+	return pgx.CollectRows(rows, pgx.RowToStructByName[E])
 }
