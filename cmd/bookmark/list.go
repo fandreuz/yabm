@@ -23,6 +23,3 @@ var ListCmd = &cobra.Command{
 		return nil
 	},
 }
-
-func init() {
-}

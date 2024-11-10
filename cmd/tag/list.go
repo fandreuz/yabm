@@ -24,5 +24,3 @@ var ListCmd = &cobra.Command{
 	},
 }
 
-func init() {
-}

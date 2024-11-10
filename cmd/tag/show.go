@@ -30,6 +30,3 @@ var ShowCmd = &cobra.Command{
 		return nil
 	},
 }
-
-func init() {
-}
