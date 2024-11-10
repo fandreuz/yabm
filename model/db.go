@@ -6,12 +6,15 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func openConnection(connectionUrl string) (*pgx.Conn, error) {
+// TODO
+const connectionUrl = "postgres://admin:pwd@localhost:5432/admin"
+
+func openConnection() (*pgx.Conn, error) {
 	return pgx.Connect(context.Background(), connectionUrl)
 }
 
 func GetBookmarkById(id uint64) (*Bookmark, error) {
-	conn, connError := openConnection("")
+	conn, connError := openConnection()
 	if connError != nil {
 		return nil, connError
 	}
@@ -29,13 +32,13 @@ func GetBookmarkById(id uint64) (*Bookmark, error) {
 }
 
 func GetTagById(id uint64) (*Tag, error) {
-	conn, connError := openConnection("")
+	conn, connError := openConnection()
 	if connError != nil {
 		return nil, connError
 	}
 
     sqlQuery := "select label, creationDate from bookmarks where id=$1"
-    
+
     var label string
 	var creationDate uint64
 	queryErr := conn.QueryRow(context.Background(), sqlQuery, id).Scan(&label, &creationDate)
