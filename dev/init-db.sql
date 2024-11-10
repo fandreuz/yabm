@@ -1,12 +1,12 @@
 create table bookmarks (
-    id BIGSERIAL PRIMARY KEY NOT NULL,
-    url text NOT NULL,
-    title text NOT NULL,
-    creationDate DATE NOT NULL
+    id bigserial primary key not null,
+    url text not null,
+    title text not null,
+    creationDate timestamp not null
 );
 
 create table tags (
-    id BIGSERIAL PRIMARY KEY NOT NULL,
-    label varchar(100) NOT NULL,
-    creationDate DATE NOT NULL
+    id bigserial primary key not null,
+    label varchar(100) not null,
+    creationDate timestamp not null
 );
