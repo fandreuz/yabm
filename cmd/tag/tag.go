@@ -20,6 +20,4 @@ func Execute() {
 
 func init() {
 	TagCmd.AddCommand(AddCmd)
-	TagCmd.AddCommand(ListCmd)
-	TagCmd.AddCommand(ShowCmd)
 }

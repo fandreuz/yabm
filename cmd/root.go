@@ -8,6 +8,7 @@ import (
 
 	"github.com/fandreuz/yabm/cmd/bookmark"
 	"github.com/fandreuz/yabm/cmd/tag"
+	"github.com/fandreuz/yabm/model"
 	"github.com/spf13/cobra"
 )
 
@@ -36,5 +37,10 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	rootCmd.AddCommand(bookmark.BookmarkCmd)
+	bookmark.BookmarkCmd.AddCommand(MakeShowCommand(model.GetBookmarkById))
+	bookmark.BookmarkCmd.AddCommand(MakeListCommand(model.ListBookmarks))
+
 	rootCmd.AddCommand(tag.TagCmd)
+	tag.TagCmd.AddCommand(MakeShowCommand(model.GetTagById))
+	tag.TagCmd.AddCommand(MakeListCommand(model.ListTags))
 }
