@@ -6,6 +6,8 @@ package cmd
 import (
 	"os"
 
+	"github.com/fandreuz/yabm/cmd/bookmark"
+	"github.com/fandreuz/yabm/cmd/tag"
 	"github.com/spf13/cobra"
 )
 
@@ -31,4 +33,7 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	rootCmd.AddCommand(bookmark.BookmarkCmd)
+	rootCmd.AddCommand(tag.TagCmd)
 }
