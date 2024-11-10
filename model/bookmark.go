@@ -2,28 +2,22 @@ package model
 
 import (
 	"fmt"
+	"time"
 )
 
 type Bookmark struct {
-	Id           *uint64
-	Url          string
-	Title        *string
+	Id    uint64
+	Url   string
+	Title string
 	// Milliseconds since epoch (UTC)
-	CreationDate uint64
-}
-
-func NewBookmark(url string, creationDate uint64) Bookmark {
-	return Bookmark{Url: url, CreationDate: creationDate}
+	CreationDate time.Time
 }
 
 func (b Bookmark) String() string {
-	content := fmt.Sprintf("url: '%s', title: '%v', creationDate: '%d'", b.Url, b.Title, b.CreationDate)
-	if b.Id != nil {
-		return fmt.Sprintf("{%s, id: '%d'}", content, *(b.Id))
-	}
-	return fmt.Sprintf("{%s}", content)
+	return fmt.Sprintf("{id: '%d', url: '%s', title: '%v', creationDate: '%s'}", b.Id, b.Url, b.Title, b.CreationDate)
 }
 
-func (b Bookmark) WithId(id uint64) Bookmark {
-	return Bookmark{Id: &id, Url: b.Url, Title: b.Title, CreationDate: b.CreationDate}
+type BookmarkCreationRequest struct {
+	Title string
+	Url   string
 }

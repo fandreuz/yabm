@@ -1,26 +1,21 @@
 package model
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Tag struct {
-	Id    *uint64
+	Id    uint64
 	Label string
 	// Milliseconds since epoch (UTC)
-	CreationDate uint64	
-}
-
-func NewTag(label string, creationDate uint64) Tag {
-	return Tag{Label: label, CreationDate: creationDate}
+	CreationDate time.Time
 }
 
 func (t Tag) String() string {
-	content := fmt.Sprintf("label: '%s', creationDate: '%d'", t.Label, t.CreationDate)
-	if t.Id != nil {
-		return fmt.Sprintf("{%s, id: '%d'}", content, *(t.Id))
-	}
-	return fmt.Sprintf("{%s}", content)
+	return fmt.Sprintf("{id: '%d', label: '%s', creationDate: '%s'}", t.Id, t.Label, t.CreationDate)
 }
 
-func (t Tag) WithId(id uint64) Tag {
-	return Tag{Id: &id, Label: t.Label, CreationDate: t.CreationDate}
+type TagCreationRequest struct {
+	Label string
 }

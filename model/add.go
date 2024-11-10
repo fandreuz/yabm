@@ -2,73 +2,44 @@ package model
 
 import (
 	"context"
+	"time"
 )
 
 
-func AddBookmark(b Bookmark) (*Bookmark, error) {
+func AddBookmark(request BookmarkCreationRequest) (*Bookmark, error) {
 	conn, connError := openConnection()
 	if connError != nil {
 		return nil, connError
 	}
 	defer conn.Close(context.TODO())
 
-	transaction, transactionErr := conn.Begin(context.TODO())
-	if transactionErr != nil {
-		return nil, transactionErr
-	}
+    sqlInsertQuery := "insert into bookmarks (url, title, creationDate) values ($1, $2, now()) returning id, creationDate"
 
-    sqlInsertQuery := "insert into bookmarks (url, creationDate) values ($1, $2)"
-	_, dbInsertErr := transaction.Exec(context.TODO(), sqlInsertQuery, b.Url, b.CreationDate)
+	var id uint64
+	var creationDate time.Time
+	dbInsertErr := conn.QueryRow(context.TODO(), sqlInsertQuery, request.Url, request.Title).Scan(&id, &creationDate)
 	if dbInsertErr != nil {
 		return nil, dbInsertErr
 	}
 
-	sqlIdQuery := "select currval(pg_get_serial_sequence('bookmarks', 'id'))"
-	var id uint64
-	dbSelectErr := transaction.QueryRow(context.TODO(), sqlIdQuery).Scan(&id)
-	if dbSelectErr != nil {
-		return nil, dbSelectErr
-	}
-
-	commitErr := transaction.Commit(context.TODO())
-	if commitErr != nil {
-		return nil, commitErr
-	}
-
-	var newBookmark = b.WithId(id)
-	return &newBookmark, nil
+	return &Bookmark{Url: request.Url, Title: "", Id: id, CreationDate: creationDate}, nil
 }
 
-func AddTag(t Tag) (*Tag, error) {
+func AddTag(request TagCreationRequest) (*Tag, error) {
 	conn, connError := openConnection()
 	if connError != nil {
 		return nil, connError
 	}
 	defer conn.Close(context.TODO())
 
-	transaction, transactionErr := conn.Begin(context.TODO())
-	if transactionErr != nil {
-		return nil, transactionErr
-	}
+    sqlInsertQuery := "insert into tags (label, creationDate) values ($1, now()) returning (id, creationDate)"
 
-    sqlInsertQuery := "insert into tags (label, creationDate) values ($1, $2)"
-	_, dbInsertErr := transaction.Exec(context.TODO(), sqlInsertQuery, t.Label, t.CreationDate)
+	var id uint64
+	var creationDate time.Time
+	dbInsertErr := conn.QueryRow(context.TODO(), sqlInsertQuery, request.Label).Scan(&id, &creationDate)
 	if dbInsertErr != nil {
 		return nil, dbInsertErr
 	}
 
-	sqlIdQuery := "select currval(pg_get_serial_sequence('tags', 'id'))"
-	var id uint64
-	dbSelectErr := transaction.QueryRow(context.TODO(), sqlIdQuery).Scan(&id)
-	if dbSelectErr != nil {
-		return nil, dbSelectErr
-	}
-
-	commitErr := transaction.Commit(context.TODO())
-	if commitErr != nil {
-		return nil, commitErr
-	}
-
-	var newTag = t.WithId(id)
-	return &newTag, nil
+	return &Tag{Label: request.Label, CreationDate: creationDate, Id: id}, nil
 }

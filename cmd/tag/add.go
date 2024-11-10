@@ -2,7 +2,6 @@ package tag
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/fandreuz/yabm/model"
 	"github.com/spf13/cobra"
@@ -16,19 +15,14 @@ var AddCmd = &cobra.Command{
 			return fmt.Errorf("'add' expects only one argument")
 		}
 
-		label := args[0]
-		creationDate := time.Now().UTC().UTC().UnixMilli()
-		tag := model.NewTag(label, uint64(creationDate))
+		request := model.TagCreationRequest{Label: args[0]}
 
-		tagWithId, dbErr := model.AddTag(tag)
+		tag, dbErr := model.AddTag(request)
 		if dbErr != nil {
 			return dbErr
 		}
-		if tagWithId.Id == nil {
-			panic(fmt.Errorf("Unexpected nil in tag ID"))
-		}
+		fmt.Println(tag)
 
-		fmt.Printf("Created tag with ID %d\n", *(tagWithId.Id))
 		return nil
 	},
 }

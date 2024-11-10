@@ -2,7 +2,6 @@ package bookmark
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/fandreuz/yabm/model"
 	"github.com/spf13/cobra"
@@ -16,19 +15,14 @@ var AddCmd = &cobra.Command{
 			return fmt.Errorf("'add' expects only one argument")
 		}
 
-		url := args[0]
-		creationDate := time.Now().UTC().UTC().UnixMilli()
-		bookmark := model.NewBookmark(url, uint64(creationDate))
+		request := model.BookmarkCreationRequest{Url: args[0], Title: ""}
 
-		bookmarkWithId, dbErr := model.AddBookmark(bookmark)
+		bookmark, dbErr := model.AddBookmark(request)
 		if dbErr != nil {
 			return dbErr
 		}
+		fmt.Println(bookmark)
 
-		if bookmarkWithId.Id == nil {
-			panic(fmt.Errorf("Unexpected nil in bookmark ID"))
-		}
-		fmt.Printf("Created bookmark with ID %d\n", *(bookmarkWithId.Id))
 		return nil
 	},
 }
