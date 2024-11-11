@@ -13,8 +13,8 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "yabm",
-	Short: "Simple command-line bookmark manager",
+	Use:          "yabm",
+	Short:        "Simple command-line bookmark manager",
 	SilenceUsage: true,
 }
 

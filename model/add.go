@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-
 func AddBookmark(request BookmarkCreationRequest) (*Bookmark, error) {
 	conn, connError := openConnection()
 	if connError != nil {
@@ -13,7 +12,7 @@ func AddBookmark(request BookmarkCreationRequest) (*Bookmark, error) {
 	}
 	defer conn.Close(context.TODO())
 
-    sqlInsertQuery := "insert into bookmarks (url, title, creationDate) values ($1, $2, now()) returning id, creationDate"
+	sqlInsertQuery := "insert into bookmarks (url, title, creationDate) values ($1, $2, now()) returning id, creationDate"
 
 	var id uint64
 	var creationDate time.Time
@@ -32,7 +31,7 @@ func AddTag(request TagCreationRequest) (*Tag, error) {
 	}
 	defer conn.Close(context.TODO())
 
-    sqlInsertQuery := "insert into tags (label, creationDate) values ($1, now()) returning (id, creationDate)"
+	sqlInsertQuery := "insert into tags (label, creationDate) values ($1, now()) returning (id, creationDate)"
 
 	var id uint64
 	var creationDate time.Time
