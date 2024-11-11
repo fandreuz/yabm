@@ -7,6 +7,6 @@ create table bookmarks (
 
 create table tags (
     Id bigserial primary key not null,
-    Label varchar(100) not null,
+    Label varchar(100) not null unique,
     CreationDate timestamp not null
 );
