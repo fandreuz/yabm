@@ -21,7 +21,7 @@ func AddBookmark(request BookmarkCreationRequest) (*Bookmark, error) {
 		return nil, dbInsertErr
 	}
 
-	return &Bookmark{Url: request.Url, Title: "", Id: id, CreationDate: creationDate}, nil
+	return &Bookmark{Url: request.Url, Title: request.Title, Id: id, CreationDate: creationDate}, nil
 }
 
 func AddTag(request TagCreationRequest) (*Tag, error) {

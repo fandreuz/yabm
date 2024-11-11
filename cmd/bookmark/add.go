@@ -2,10 +2,31 @@ package bookmark
 
 import (
 	"fmt"
+	"net/http"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/fandreuz/yabm/model"
 	"github.com/spf13/cobra"
 )
+
+func getWebpageTitle(url string) (string, error) {
+	res, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return "", fmt.Errorf("Got HTTP error (%d, %s)", res.StatusCode, res.Status)
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return doc.Find("title").Text(), nil
+}
 
 var AddCmd = &cobra.Command{
 	Use:   "add",
@@ -15,7 +36,13 @@ var AddCmd = &cobra.Command{
 			return fmt.Errorf("'add' expects only one argument")
 		}
 
-		request := model.BookmarkCreationRequest{Url: args[0], Title: ""}
+		url := args[0]
+		title, titleErr := getWebpageTitle(url)
+		if titleErr != nil {
+			return titleErr
+		}
+
+		request := model.BookmarkCreationRequest{Url: url, Title: title}
 
 		bookmark, dbErr := model.AddBookmark(request)
 		if dbErr != nil {
