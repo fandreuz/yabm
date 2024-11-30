@@ -30,7 +30,6 @@ func MakeShowCommand[E fmt.Stringer](extractor func(uint64) (E, error)) *cobra.C
 			return nil
 		},
 	}
-
 }
 
 func MakeListCommand[E fmt.Stringer](extractor func() ([]E, error)) *cobra.Command {
