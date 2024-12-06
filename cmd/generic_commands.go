@@ -42,8 +42,8 @@ func MakeListCommand[E fmt.Stringer](extractor func() ([]E, error)) *cobra.Comma
 				return err
 			}
 
-			for idx, t := range entities {
-				fmt.Printf("%d -- %v\n", idx, t)
+			for _, t := range entities {
+				fmt.Printf("%v\n", t)
 			}
 
 			return nil
