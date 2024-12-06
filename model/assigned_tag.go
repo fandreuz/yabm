@@ -8,7 +8,7 @@ import (
 )
 
 type AssignedTag struct {
-	TagId    uint64
+	TagId      uint64
 	BookmarkId uint64
 }
 
@@ -17,7 +17,7 @@ func (t AssignedTag) String() string {
 }
 
 type TagAssignationRequest struct {
-	TagId uint64
+	TagId      uint64
 	BookmarkId uint64
 }
 
