@@ -44,7 +44,7 @@ var AddCmd = &cobra.Command{
 
 		request := model.BookmarkCreationRequest{Url: url, Title: title}
 
-		bookmark, dbErr := model.AddBookmark(request)
+		bookmark, dbErr := model.CreateBookmark(request)
 		if dbErr != nil {
 			return dbErr
 		}

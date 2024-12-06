@@ -17,7 +17,7 @@ var AddCmd = &cobra.Command{
 
 		request := model.TagCreationRequest{Label: args[0]}
 
-		tag, dbErr := model.AddTag(request)
+		tag, dbErr := model.GetOrCreateTag(request)
 		if dbErr != nil {
 			return dbErr
 		}
