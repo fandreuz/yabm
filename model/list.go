@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func ListBookmarks() ([]Bookmark, error) {
@@ -23,6 +24,9 @@ func listEntities[E any](sqlQuery string) ([]E, error) {
 
 	rows, queryErr := conn.Query(context.TODO(), sqlQuery)
 	if queryErr != nil {
+		if pgErr, ok := queryErr.(*pgconn.PgError); ok {
+			return nil, handleDatabaseError(pgErr)
+		}
 		return nil, queryErr
 	}
 	defer rows.Close()

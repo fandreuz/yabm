@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func GetBookmarkById(id uint64) (Bookmark, error) {
@@ -25,6 +26,9 @@ func getById[E any](sqlQuery string, id uint64) (E, error) {
 
 	rows, queryErr := conn.Query(context.TODO(), sqlQuery, id)
 	if queryErr != nil {
+		if pgErr, ok := queryErr.(*pgconn.PgError); ok {
+			return errorEntity, handleDatabaseError(pgErr)
+		}
 		return errorEntity, queryErr
 	}
 

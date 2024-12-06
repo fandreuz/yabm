@@ -2,8 +2,10 @@ package model
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 // TODO
@@ -11,4 +13,8 @@ const connectionUrl = "postgres://admin:pwd@localhost:5432/admin"
 
 func openConnection() (*pgx.Conn, error) {
 	return pgx.Connect(context.TODO(), connectionUrl)
+}
+
+func handleDatabaseError(pgErr *pgconn.PgError) error {
+	return fmt.Errorf("DB error occurred, code: %s, message: '%s', details: '%s'", pgErr.Code, pgErr.Message, pgErr.Detail)
 }
