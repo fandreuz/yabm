@@ -12,6 +12,7 @@ create table tags (
 );
 
 create table assigned_tags (
-    TagId numeric references tags(Id)
-    BookmarkId numeric references bookmarks(Id)
+    TagId bigint references tags(Id) deferrable initially deferred,
+    BookmarkId bigint references bookmarks(Id) deferrable initially deferred,
+    unique (TagId, BookmarkId)
 )
