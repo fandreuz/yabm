@@ -10,3 +10,8 @@ create table tags (
     Label varchar(100) not null unique,
     CreationDate timestamp not null
 );
+
+create table assigned_tags (
+    TagId numeric references tags(Id)
+    BookmarkId numeric references bookmarks(Id)
+)
