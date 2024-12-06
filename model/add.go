@@ -12,11 +12,13 @@ type queryableSession interface {
 	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
 }
 
-func execQueryAndReturn[T any](sqlInsertQuery string, session queryableSession) (*T, error) {
+type databaseErrorHandler func(dbError *pgconn.PgError) error
+
+func execQueryAndReturn[T any](sqlInsertQuery string, session queryableSession, handler databaseErrorHandler) (*T, error) {
 	rows, dbInsertErr := session.Query(context.TODO(), sqlInsertQuery)
 	if dbInsertErr != nil {
 		if pgErr, ok := dbInsertErr.(*pgconn.PgError); ok {
-			return nil, handleDatabaseError(pgErr)
+			return nil, handler(pgErr)
 		}
 		return nil, dbInsertErr
 	}
@@ -24,9 +26,9 @@ func execQueryAndReturn[T any](sqlInsertQuery string, session queryableSession) 
 	mappedRows, rowsCollectionError := pgx.CollectRows(rows, pgx.RowToStructByName[T])
 	if rowsCollectionError != nil {
 		if pgErr, ok := rowsCollectionError.(*pgconn.PgError); ok {
-			return nil, handleDatabaseError(pgErr)
+			return nil, handler(pgErr)
 		}
-		return nil, rowsCollectionError
+		return nil, fmt.Errorf("Error occurred during row collection to struct of type '%T': '%s'", *new(T), rowsCollectionError.Error())
 	}
 
 	if len(mappedRows) == 0 {
@@ -42,8 +44,8 @@ func CreateBookmark(request BookmarkCreationRequest) (*Bookmark, error) {
 	}
 	defer conn.Close(context.TODO())
 
-	sqlInsertQuery := fmt.Sprintf("insert into bookmarks (url, title, creationDate) values (%s, %s, now()) returning id, creationDate", request.Url, request.Title)
-	return execQueryAndReturn[Bookmark](sqlInsertQuery, conn)
+	sqlInsertQuery := fmt.Sprintf("insert into bookmarks (url, title, creationDate) values ('%s', '%s', now()) returning *", request.Url, request.Title)
+	return execQueryAndReturn[Bookmark](sqlInsertQuery, conn, handleDatabaseError)
 }
 
 func GetOrCreateTag(request TagCreationRequest) (*Tag, error) {
@@ -59,14 +61,20 @@ func GetOrCreateTag(request TagCreationRequest) (*Tag, error) {
 	}
 	defer tx.Rollback(context.TODO())
 
-	sqlSelectQuery := fmt.Sprintf("select (id, label, creationDate) from tags where label = '%s'", request.Label)
-	tag, err := execQueryAndReturn[Tag](sqlSelectQuery, tx)
-	if tag != nil || err != nil {
-		return tag, err
+	sqlSelectQuery := fmt.Sprintf("select * from tags where label = '%s'", request.Label)
+	tag, selectErr := execQueryAndReturn[Tag](sqlSelectQuery, tx, handleDatabaseError)
+	if tag != nil || selectErr != nil {
+		return tag, selectErr
 	}
 
-	sqlInsertQuery := fmt.Sprintf("insert into tags (label, creationDate) values (%s, now()) returning id, creationDate", request.Label)
-	return execQueryAndReturn[Tag](sqlInsertQuery, tx)
+	sqlInsertQuery := fmt.Sprintf("insert into tags (label, creationDate) values ('%s', now()) returning *", request.Label)
+	tag, insertErr := execQueryAndReturn[Tag](sqlInsertQuery, tx, handleDatabaseError)
+	if insertErr != nil {
+		return nil, insertErr
+	}
+
+	tx.Commit(context.TODO())
+	return tag, nil
 }
 
 func AssignTag(request TagAssignationRequest) (*AssignedTag, error) {
@@ -76,6 +84,12 @@ func AssignTag(request TagAssignationRequest) (*AssignedTag, error) {
 	}
 	defer conn.Close(context.TODO())
 
-	sqlInsertQuery := fmt.Sprintf("insert into assigned_tags (tagId, bookmarkId) values (%d, %d)", request.TagId, request.BookmarkId)
-	return execQueryAndReturn[AssignedTag](sqlInsertQuery, conn)
+	sqlInsertQuery := fmt.Sprintf("insert into assigned_tags (tagId, bookmarkId) values (%d, %d) returning *", request.TagId, request.BookmarkId)
+	handler := func(dbError *pgconn.PgError) error {
+		if dbError.Code == "23505" {
+			return nil
+		}
+		return handleDatabaseError(dbError)
+	}
+	return execQueryAndReturn[AssignedTag](sqlInsertQuery, conn, handler)
 }
