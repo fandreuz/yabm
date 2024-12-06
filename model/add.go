@@ -68,3 +68,14 @@ func GetOrCreateTag(request TagCreationRequest) (*Tag, error) {
 	sqlInsertQuery := fmt.Sprintf("insert into tags (label, creationDate) values (%s, now()) returning id, creationDate", request.Label)
 	return execQueryAndReturn[Tag](sqlInsertQuery, tx)
 }
+
+func AssignTag(request TagAssignationRequest) (*AssignedTag, error) {
+	conn, connError := openConnection()
+	if connError != nil {
+		return nil, connError
+	}
+	defer conn.Close(context.TODO())
+
+	sqlInsertQuery := fmt.Sprintf("insert into assigned_tags (tagId, bookmarkId) values (%d, %d)", request.TagId, request.BookmarkId)
+	return execQueryAndReturn[AssignedTag](sqlInsertQuery, conn)
+}
