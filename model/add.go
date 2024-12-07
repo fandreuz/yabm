@@ -25,7 +25,7 @@ func execQueryAndReturn[T any](sqlInsertQuery string, session queryableSession, 
 		if pgErr, ok := rowsCollectionError.(*pgconn.PgError); ok {
 			return nil, handler(pgErr)
 		}
-		return nil, fmt.Errorf("Error occurred during row collection to struct of type '%T': '%s'", *new(T), rowsCollectionError.Error())
+		return nil, rowsCollectionError
 	}
 	return &mappedRows, nil
 }
@@ -41,6 +41,12 @@ func CreateBookmark(request BookmarkCreationRequest) (*Bookmark, error) {
 	return execQueryAndReturn[Bookmark](sqlInsertQuery, conn, handleDatabaseError)
 }
 
+func findTagByLabel(label string, session queryableSession) (*Tag, error) {
+	sqlSelectQuery := fmt.Sprintf("select * from tags where label = '%s'", label)
+	return execQueryAndReturn[Tag](sqlSelectQuery, session, handleDatabaseError)
+
+}
+
 func GetOrCreateTag(request TagCreationRequest) (*Tag, error) {
 	conn, connError := openConnection()
 	if connError != nil {
@@ -54,10 +60,9 @@ func GetOrCreateTag(request TagCreationRequest) (*Tag, error) {
 	}
 	defer tx.Rollback(context.TODO())
 
-	sqlSelectQuery := fmt.Sprintf("select * from tags where label = '%s'", request.Label)
-	tag, selectErr := execQueryAndReturn[Tag](sqlSelectQuery, tx, handleDatabaseError)
-	if tag != nil || selectErr != nil {
-		return tag, selectErr
+	tag, findTagByLabelErr := findTagByLabel(request.Label, tx)
+	if tag != nil || findTagByLabelErr != nil {
+		return tag, findTagByLabelErr
 	}
 
 	sqlInsertQuery := fmt.Sprintf("insert into tags (label, creationDate) values ('%s', now()) returning *", request.Label)
