@@ -31,22 +31,3 @@ func MakeShowCommand[E fmt.Stringer](extractor func(uint64) (E, error)) *cobra.C
 		},
 	}
 }
-
-func MakeListCommand[E fmt.Stringer](extractor func() ([]E, error)) *cobra.Command {
-	return &cobra.Command{
-		Use:   "list",
-		Short: "List saved entities",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			entities, err := extractor()
-			if err != nil {
-				return err
-			}
-
-			for _, t := range entities {
-				fmt.Printf("%v\n", t)
-			}
-
-			return nil
-		},
-	}
-}

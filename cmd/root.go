@@ -33,5 +33,4 @@ func init() {
 
 	rootCmd.AddCommand(tag.TagCmd)
 	tag.TagCmd.AddCommand(MakeShowCommand(model.GetTagById))
-	tag.TagCmd.AddCommand(MakeListCommand(model.ListTags))
 }
