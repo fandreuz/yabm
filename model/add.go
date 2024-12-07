@@ -4,31 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
-
-type databaseErrorHandler func(dbError *pgconn.PgError) error
-
-func execQueryAndReturn[T any](sqlInsertQuery string, session queryableSession, handler databaseErrorHandler) (*T, error) {
-	rows, dbInsertErr := session.Query(context.TODO(), sqlInsertQuery)
-	if dbInsertErr != nil {
-		if pgErr, ok := dbInsertErr.(*pgconn.PgError); ok {
-			return nil, handler(pgErr)
-		}
-		return nil, dbInsertErr
-	}
-	defer rows.Close()
-
-	mappedRows, rowsCollectionError := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[T])
-	if rowsCollectionError != nil {
-		if pgErr, ok := rowsCollectionError.(*pgconn.PgError); ok {
-			return nil, handler(pgErr)
-		}
-		return nil, rowsCollectionError
-	}
-	return &mappedRows, nil
-}
 
 func CreateBookmark(request BookmarkCreationRequest) (*Bookmark, error) {
 	conn, connError := openConnection()
