@@ -8,10 +8,6 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-type queryableSession interface {
-	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
-}
-
 type databaseErrorHandler func(dbError *pgconn.PgError) error
 
 func execQueryAndReturn[T any](sqlInsertQuery string, session queryableSession, handler databaseErrorHandler) (*T, error) {
@@ -22,6 +18,7 @@ func execQueryAndReturn[T any](sqlInsertQuery string, session queryableSession, 
 		}
 		return nil, dbInsertErr
 	}
+	defer rows.Close()
 
 	mappedRows, rowsCollectionError := pgx.CollectRows(rows, pgx.RowToStructByName[T])
 	if rowsCollectionError != nil {
