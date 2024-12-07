@@ -30,7 +30,6 @@ func init() {
 
 	rootCmd.AddCommand(bookmark.BookmarkCmd)
 	bookmark.BookmarkCmd.AddCommand(MakeShowCommand(model.GetBookmarkById))
-	bookmark.BookmarkCmd.AddCommand(MakeListCommand(model.ListBookmarks))
 
 	rootCmd.AddCommand(tag.TagCmd)
 	tag.TagCmd.AddCommand(MakeShowCommand(model.GetTagById))
