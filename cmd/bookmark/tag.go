@@ -10,7 +10,7 @@ import (
 
 var TagCmd = &cobra.Command{
 	Use:   "tag",
-	Short: "Tag an existing bookmark",
+	Short: "Tag a bookmark",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 2 {
 			return fmt.Errorf("'tag' expects two arguments")
