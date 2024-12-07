@@ -31,6 +31,7 @@ func getById[E any](sqlQuery string, id uint64) (E, error) {
 		}
 		return errorEntity, queryErr
 	}
+	defer rows.Close()
 
 	return pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[E])
 }
