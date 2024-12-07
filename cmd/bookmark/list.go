@@ -8,6 +8,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func removeDuplicate[T comparable](sliceList []T) []T {
+	allKeys := make(map[T]bool)
+	list := []T{}
+	for _, item := range sliceList {
+		if _, value := allKeys[item]; !value {
+			allKeys[item] = true
+			list = append(list, item)
+		}
+	}
+	return list
+}
+
 var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List bookmarks",
@@ -18,7 +30,7 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		bookmarks, err := model.ListBookmarks(tagNames)
+		bookmarks, err := model.ListBookmarks(removeDuplicate(tagNames))
 		if err != nil {
 			return err
 		}

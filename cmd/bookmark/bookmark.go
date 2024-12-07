@@ -18,5 +18,5 @@ func init() {
 	BookmarkCmd.AddCommand(TagCmd)
 
 	BookmarkCmd.AddCommand(ListCmd)
-	ListCmd.Flags().StringArray("tag", []string{}, "tag")
+	ListCmd.Flags().StringArray("tag", []string{}, "Tags filter (AND)")
 }

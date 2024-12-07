@@ -32,10 +32,10 @@ func ListBookmarks(tagNames []string) ([]Bookmark, error) {
 	selectTagWhereRhs := quoteAndJoin(tagNames)
 	selectQuery := fmt.Sprintf(`
 select * from bookmarks where id in (
-	select distinct bookmarkId from assigned_tags where tagId in (
+	select bookmarkId from assigned_tags where tagId in (
 		select distinct id from tags where label in (%s)
-	)
-)`, selectTagWhereRhs)
+	) group by bookmarkId having count(*) = %d
+)`, selectTagWhereRhs, len(tagNames))
 	return listEntities[Bookmark](selectQuery, conn)
 }
 
