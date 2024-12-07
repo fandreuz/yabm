@@ -20,18 +20,14 @@ func execQueryAndReturn[T any](sqlInsertQuery string, session queryableSession, 
 	}
 	defer rows.Close()
 
-	mappedRows, rowsCollectionError := pgx.CollectRows(rows, pgx.RowToStructByName[T])
+	mappedRows, rowsCollectionError := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[T])
 	if rowsCollectionError != nil {
 		if pgErr, ok := rowsCollectionError.(*pgconn.PgError); ok {
 			return nil, handler(pgErr)
 		}
 		return nil, fmt.Errorf("Error occurred during row collection to struct of type '%T': '%s'", *new(T), rowsCollectionError.Error())
 	}
-
-	if len(mappedRows) == 0 {
-		return nil, nil
-	}
-	return &mappedRows[0], nil
+	return &mappedRows, nil
 }
 
 func CreateBookmark(request BookmarkCreationRequest) (*Bookmark, error) {
