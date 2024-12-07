@@ -8,6 +8,10 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
+type queryableSession interface {
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+}
+
 // TODO
 const connectionUrl = "postgres://admin:pwd@localhost:5432/admin"
 
