@@ -17,3 +17,8 @@ type TagAssignationRequest struct {
 	TagId      uint64
 	BookmarkId uint64
 }
+
+type TagAssignationByLabelRequest struct {
+	TagLabel   string
+	BookmarkId uint64
+}
