@@ -30,7 +30,7 @@ var UntagCmd = &cobra.Command{
 			return model.UnassignTagByLabel(request)
 		} else {
 			request := model.TagAssignationRequest{TagId: tagId, BookmarkId: bookmarkId}
-			return model.UnassignTag(request)
+			return model.UnassignTagById(request)
 		}
 	},
 }

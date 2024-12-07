@@ -38,7 +38,7 @@ func UnassignTagByLabel(request TagAssignationByLabelRequest) error {
 	return unassignErr
 }
 
-func UnassignTag(request TagAssignationRequest) error {
+func UnassignTagById(request TagAssignationRequest) error {
 	conn, connError := openConnection()
 	if connError != nil {
 		return connError
