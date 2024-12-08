@@ -16,6 +16,9 @@ type databaseErrorHandler func(dbError *pgconn.PgError) error
 
 // TODO
 const connectionUrl = "postgres://admin:pwd@localhost:5432/admin"
+const bookmarksTable = "bookmarks"
+const tagsTable = "tags"
+const assignedTagsTable = "assigned_tags"
 
 func openConnection() (*pgx.Conn, error) {
 	return pgx.Connect(context.TODO(), connectionUrl)
