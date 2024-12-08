@@ -47,3 +47,12 @@ func execQueryAndReturn[T any](sqlInsertQuery string, session queryableSession, 
 	}
 	return &mappedRows, nil
 }
+
+func execQuery(sqlInsertQuery string, session queryableSession) error {
+	rows, dbInsertErr := session.Query(context.TODO(), sqlInsertQuery)
+	if dbInsertErr != nil {
+		return dbInsertErr
+	}
+	defer rows.Close()
+	return nil
+}

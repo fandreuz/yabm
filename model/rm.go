@@ -32,11 +32,12 @@ func UnassignTagByLabel(request entity.TagAssignationByLabelRequest) error {
 		return findTagByLabelErr
 	}
 
-	unassignErr := unassignTag(entity.TagAssignationRequest{TagId: tag.Id, BookmarkId: request.BookmarkId}, tx)
-	if unassignErr == nil {
-		tx.Commit(context.TODO())
+	if unassignErr := unassignTag(entity.TagAssignationRequest{TagId: tag.Id, BookmarkId: request.BookmarkId}, tx); unassignErr != nil {
+		return unassignErr
 	}
-	return unassignErr
+
+	tx.Commit(context.TODO())
+	return nil
 }
 
 func UnassignTagById(request entity.TagAssignationRequest) error {
@@ -48,11 +49,49 @@ func UnassignTagById(request entity.TagAssignationRequest) error {
 	return unassignTag(request, conn)
 }
 
-func unassignTag(request entity.TagAssignationRequest, session queryableSession) error {
-	sqlInsertQuery := fmt.Sprintf("delete from assigned_tags where tagId = %d AND bookmarkId = %d returning *", request.TagId, request.BookmarkId)
-	handler := func(dbError *pgconn.PgError) error {
-		return handleDatabaseError(dbError)
+func deleteAssignedTags(id uint64, columnName string, session queryableSession) error {
+	whereClause := fmt.Sprintf("where %s = %d", columnName, id)
+	return deleteEntity[entity.AssignedTag](assignedTagsTable, whereClause, session)
+}
+
+func DeleteBookmarkById(id uint64) error {
+	conn, connError := openConnection()
+	if connError != nil {
+		return connError
 	}
-	_, err := execQueryAndReturn[entity.AssignedTag](sqlInsertQuery, session, handler)
-	return err
+	defer conn.Close(context.TODO())
+
+	tx, transactionErr := conn.Begin(context.TODO())
+	if transactionErr != nil {
+		return transactionErr
+	}
+	defer tx.Rollback(context.TODO())
+
+	if err := deleteAssignedTags(id, "bookmarkId", tx); err != nil {
+		return err
+	}
+
+	whereClause := fmt.Sprintf("where id = %d", id)
+	if err := deleteEntity[entity.Bookmark](bookmarksTable, whereClause, tx); err != nil {
+		return err
+	}
+
+	tx.Commit(context.TODO())
+	return nil
+}
+
+func unassignTag(request entity.TagAssignationRequest, session queryableSession) error {
+	whereClause := fmt.Sprintf("where tagId = %d AND bookmarkId = %d", request.TagId, request.BookmarkId)
+	return deleteEntity[entity.AssignedTag](assignedTagsTable, whereClause, session)
+}
+
+func deleteEntity[T any](table string, whereClause string, session queryableSession) error {
+	sqlQuery := fmt.Sprintf("delete from %s %s", table, whereClause)
+	if err := execQuery(sqlQuery, session); err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			return handleDatabaseError(pgErr)
+		}
+		return err
+	}
+	return nil
 }

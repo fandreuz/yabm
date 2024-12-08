@@ -14,6 +14,7 @@ var BookmarkCmd = &cobra.Command{
 
 func init() {
 	BookmarkCmd.AddCommand(AddCmd)
+	BookmarkCmd.AddCommand(DeleteCmd)
 
 	BookmarkCmd.AddCommand(TagCmd)
 	BookmarkCmd.AddCommand(UntagCmd)
