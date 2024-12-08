@@ -1,6 +1,7 @@
 package bookmark
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -47,7 +48,12 @@ var AddCmd = &cobra.Command{
 		if dbErr != nil {
 			return dbErr
 		}
-		fmt.Println(bookmark)
+
+		b, jsonErr := json.Marshal(bookmark)
+		if jsonErr != nil {
+			return jsonErr
+		}
+		fmt.Println(string(b))
 
 		return nil
 	},
