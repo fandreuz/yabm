@@ -3,6 +3,7 @@ package bookmark
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/fandreuz/yabm/model"
@@ -26,7 +27,7 @@ func getWebpageTitle(url string) (string, error) {
 		return "", err
 	}
 
-	return doc.Find("title").Text(), nil
+	return strings.TrimSpace(doc.Find("title").Text()), nil
 }
 
 var AddCmd = &cobra.Command{
