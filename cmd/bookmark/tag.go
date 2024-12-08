@@ -17,7 +17,7 @@ var TagCmd = &cobra.Command{
 			return fmt.Errorf("'tag' expects two arguments")
 		}
 
-		bookmarkId, err := strconv.Atoi(args[0])
+		bookmarkId, err := strconv.ParseUint(args[0], 10, 64)
 		if err != nil {
 			return err
 		}
@@ -25,7 +25,7 @@ var TagCmd = &cobra.Command{
 			return fmt.Errorf("Bookmark ID must be positive, got %d", bookmarkId)
 		}
 
-		tagId, err := strconv.Atoi(args[1])
+		tagId, err := strconv.ParseUint(args[1], 10, 64)
 		if err != nil {
 			request := entity.TagCreationRequest{Label: args[1]}
 
@@ -33,14 +33,14 @@ var TagCmd = &cobra.Command{
 			if dbErr != nil {
 				return dbErr
 			}
-			tagId = int(tag.Id)
+			tagId = tag.Id
 		} else {
 			if tagId < 0 {
 				return fmt.Errorf("Tag ID must be positive, got %d", tagId)
 			}
 		}
 
-		request := entity.TagAssignationRequest{TagId: uint64(tagId), BookmarkId: uint64(bookmarkId)}
+		request := entity.TagAssignationRequest{TagId: tagId, BookmarkId: bookmarkId}
 		model.AssignTag(request)
 
 		return nil
