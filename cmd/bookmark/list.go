@@ -21,16 +21,14 @@ func removeDuplicate[T comparable](sliceList []T) []T {
 }
 
 var ListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   "list { tagLabel | tagId } ...",
 	Short: "List saved bookmarks",
-	Args:  cobra.NoArgs,
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		keys := tagsTrie.Search(toComplete, 5)
+		return keys, cobra.ShellCompDirectiveNoFileComp
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		tagNames, err := cmd.Flags().GetStringArray("tag")
-		if err != nil {
-			return err
-		}
-
-		bookmarks, err := model.ListBookmarks(removeDuplicate(tagNames))
+		bookmarks, err := model.ListBookmarks(removeDuplicate(args))
 		if err != nil {
 			return err
 		}
