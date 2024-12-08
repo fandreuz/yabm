@@ -9,19 +9,16 @@ import (
 
 func MakeShowCommand[E fmt.Stringer](extractor func(uint64) (E, error)) *cobra.Command {
 	return &cobra.Command{
-		Use:   "show",
+		Use:   "show id",
+		Args: cobra.ExactArgs(1),
 		Short: "Show details for a specific entity",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) > 1 {
-				return fmt.Errorf("'show' expects only one argument")
-			}
-
-			id, idConvErr := strconv.ParseInt(args[0], 10, 64)
+			id, idConvErr := strconv.ParseUint(args[0], 10, 64)
 			if idConvErr != nil {
 				return idConvErr
 			}
 
-			e, dbErr := extractor(uint64(id))
+			e, dbErr := extractor(id)
 			if dbErr != nil {
 				return dbErr
 			}

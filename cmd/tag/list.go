@@ -9,7 +9,7 @@ import (
 
 var ListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List bookmarks",
+	Short: "List tags",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		entities, err := model.ListTags()

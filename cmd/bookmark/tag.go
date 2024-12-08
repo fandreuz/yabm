@@ -1,7 +1,6 @@
 package bookmark
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/fandreuz/yabm/model"
@@ -10,38 +9,30 @@ import (
 )
 
 var TagCmd = &cobra.Command{
-	Use:   "tag",
+	Use:   "tag bookmarkId { tagLabel | tagId } ...",
 	Short: "Tag a bookmark",
+	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 2 {
-			return fmt.Errorf("'tag' expects two arguments")
-		}
-
 		bookmarkId, err := strconv.ParseUint(args[0], 10, 64)
 		if err != nil {
 			return err
 		}
-		if bookmarkId < 0 {
-			return fmt.Errorf("Bookmark ID must be positive, got %d", bookmarkId)
-		}
 
-		tagId, err := strconv.ParseUint(args[1], 10, 64)
-		if err != nil {
-			request := entity.TagCreationRequest{Label: args[1]}
-
-			tag, dbErr := model.GetOrCreateTag(request)
-			if dbErr != nil {
-				return dbErr
+		for i := 1; i < len(args); i++ {
+			var err error
+			tagId, err := strconv.ParseUint(args[i], 10, 64)
+			if err == nil {
+				request := entity.TagAssignationRequest{TagId: tagId, BookmarkId: bookmarkId}
+				_, err = model.AssignTagById(request)
+			} else {
+				request := entity.TagAssignationByLabelRequest{TagLabel: args[i], BookmarkId: bookmarkId}
+				_, err = model.AssignTagByLabel(request)
 			}
-			tagId = tag.Id
-		} else {
-			if tagId < 0 {
-				return fmt.Errorf("Tag ID must be positive, got %d", tagId)
+
+			if err != nil {
+				return err
 			}
 		}
-
-		request := entity.TagAssignationRequest{TagId: tagId, BookmarkId: bookmarkId}
-		model.AssignTag(request)
 
 		return nil
 	},

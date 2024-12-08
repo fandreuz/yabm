@@ -30,13 +30,10 @@ func getWebpageTitle(url string) (string, error) {
 }
 
 var AddCmd = &cobra.Command{
-	Use:   "add",
+	Use:   "add url",
 	Short: "Add a new bookmark",
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			return fmt.Errorf("'add' expects only one argument")
-		}
-
 		url := args[0]
 		title, titleErr := getWebpageTitle(url)
 		if titleErr != nil {

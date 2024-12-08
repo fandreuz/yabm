@@ -22,7 +22,7 @@ func removeDuplicate[T comparable](sliceList []T) []T {
 
 var ListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List bookmarks",
+	Short: "List saved bookmarks",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		tagNames, err := cmd.Flags().GetStringArray("tag")

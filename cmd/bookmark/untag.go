@@ -1,7 +1,6 @@
 package bookmark
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/fandreuz/yabm/model"
@@ -10,28 +9,30 @@ import (
 )
 
 var UntagCmd = &cobra.Command{
-	Use:   "untag",
+	Use:   "untag bookmarkId { tagLabel | tagId } ...",
 	Short: "Untag a bookmark",
+	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 2 {
-			return fmt.Errorf("'tag' expects two arguments")
-		}
-
 		bookmarkId, err := strconv.ParseUint(args[0], 10, 64)
 		if err != nil {
 			return err
 		}
-		if bookmarkId < 0 {
-			return fmt.Errorf("Bookmark ID must be positive, got %d", bookmarkId)
-		}
 
-		tagId, err := strconv.ParseUint(args[1], 10, 64)
-		if err != nil {
-			request := entity.TagAssignationByLabelRequest{TagLabel: args[1], BookmarkId: bookmarkId}
-			return model.UnassignTagByLabel(request)
-		} else {
-			request := entity.TagAssignationRequest{TagId: tagId, BookmarkId: bookmarkId}
-			return model.UnassignTagById(request)
+		for i := 1; i < len(args); i++ {
+			var err error
+			tagId, err := strconv.ParseUint(args[i], 10, 64)
+			if err != nil {
+				request := entity.TagAssignationByLabelRequest{TagLabel: args[i], BookmarkId: bookmarkId}
+				err = model.UnassignTagByLabel(request)
+			} else {
+				request := entity.TagAssignationRequest{TagId: tagId, BookmarkId: bookmarkId}
+				err = model.UnassignTagById(request)
+			}
+
+			if err != nil {
+				return err
+			}
 		}
+		return nil
 	},
 }
