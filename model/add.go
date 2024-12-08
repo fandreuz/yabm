@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/fandreuz/yabm/model/entity"
 	"github.com/jackc/pgx/v5"
@@ -11,7 +12,7 @@ import (
 )
 
 func findTagByLabel(label string, session queryableSession) (*entity.Tag, error) {
-	sqlSelectQuery := fmt.Sprintf("select * from tags where label = '%s'", label)
+	sqlSelectQuery := fmt.Sprintf("select * from %s where label = '%s'", tagsTable, label)
 	tag, err := execQueryAndReturn[entity.Tag](sqlSelectQuery, session, handleDatabaseError)
 	if tag != nil || errors.Is(err, pgx.ErrNoRows) {
 		return tag, nil
@@ -25,12 +26,12 @@ func getOrCreateTag(request entity.TagCreationRequest, tx pgx.Tx) (*entity.Tag, 
 		return tag, findTagByLabelErr
 	}
 
-	sqlInsertQuery := fmt.Sprintf("insert into tags (label, creationDate) values ('%s', now()) returning *", request.Label)
+	sqlInsertQuery := fmt.Sprintf("insert into %s (label, creationDate) values ('%s', now()) returning *", tagsTable, request.Label)
 	return execQueryAndReturn[entity.Tag](sqlInsertQuery, tx, handleDatabaseError)
 }
 
 func assignTagById(request entity.TagAssignationRequest, session queryableSession) (*entity.AssignedTag, error) {
-	sqlInsertQuery := fmt.Sprintf("insert into assigned_tags (tagId, bookmarkId) values (%d, %d) returning *", request.TagId, request.BookmarkId)
+	sqlInsertQuery := fmt.Sprintf("insert into %s (tagId, bookmarkId) values (%d, %d) returning *", assignedTagsTable, request.TagId, request.BookmarkId)
 	handler := func(dbError *pgconn.PgError) error {
 		if dbError.Code == "23505" {
 			return nil
@@ -47,7 +48,8 @@ func CreateBookmark(request entity.BookmarkCreationRequest) (*entity.Bookmark, e
 	}
 	defer conn.Close(context.TODO())
 
-	sqlInsertQuery := fmt.Sprintf("insert into bookmarks (url, title, creationDate) values ('%s', '%s', now()) returning *", request.Url, request.Title)
+	sanitizedTitle := strings.Replace(request.Title, "'", "''", -1)
+	sqlInsertQuery := fmt.Sprintf("insert into %s (url, title, creationDate) values ('%s', '%s', now()) returning *", bookmarksTable, request.Url, sanitizedTitle)
 	return execQueryAndReturn[entity.Bookmark](sqlInsertQuery, conn, handleDatabaseError)
 }
 

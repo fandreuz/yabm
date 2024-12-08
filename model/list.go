@@ -26,17 +26,17 @@ func ListBookmarks(tagNames []string) ([]entity.Bookmark, error) {
 	defer conn.Close(context.TODO())
 
 	if len(tagNames) == 0 {
-		selectQuery := fmt.Sprintf("select * from bookmarks")
+		selectQuery := fmt.Sprintf("select * from %s", bookmarksTable)
 		return listEntities[entity.Bookmark](selectQuery, conn)
 	}
 
 	selectTagWhereRhs := quoteAndJoin(tagNames)
 	selectQuery := fmt.Sprintf(`
-select * from bookmarks where id in (
-	select bookmarkId from assigned_tags where tagId in (
-		select distinct id from tags where label in (%s)
+select * from %s where id in (
+	select bookmarkId from %s where tagId in (
+		select distinct id from %s where label in (%s)
 	) group by bookmarkId having count(*) = %d
-)`, selectTagWhereRhs, len(tagNames))
+)`, bookmarksTable, assignedTagsTable, tagsTable, selectTagWhereRhs, len(tagNames))
 	return listEntities[entity.Bookmark](selectQuery, conn)
 }
 

@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/fandreuz/yabm/model/entity"
 	"github.com/jackc/pgx/v5"
@@ -9,14 +10,16 @@ import (
 )
 
 func GetBookmarkById(id uint64) (entity.Bookmark, error) {
-	return getById[entity.Bookmark]("select * from bookmarks where id=$1", id)
+	sqlQuery := fmt.Sprintf("select * from %s where id=%d", bookmarksTable, id)
+	return getById[entity.Bookmark](sqlQuery)
 }
 
 func GetTagById(id uint64) (entity.Tag, error) {
-	return getById[entity.Tag]("select * from tags where id=$1", id)
+	sqlQuery := fmt.Sprintf("select * from %s where id=%d", tagsTable, id)
+	return getById[entity.Tag](sqlQuery)
 }
 
-func getById[E any](sqlQuery string, id uint64) (E, error) {
+func getById[E any](sqlQuery string) (E, error) {
 	var errorEntity E
 
 	conn, connError := openConnection()
@@ -25,7 +28,7 @@ func getById[E any](sqlQuery string, id uint64) (E, error) {
 	}
 	defer conn.Close(context.TODO())
 
-	rows, queryErr := conn.Query(context.TODO(), sqlQuery, id)
+	rows, queryErr := conn.Query(context.TODO(), sqlQuery)
 	if queryErr != nil {
 		if pgErr, ok := queryErr.(*pgconn.PgError); ok {
 			return errorEntity, handleDatabaseError(pgErr)
