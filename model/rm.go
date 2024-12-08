@@ -5,11 +5,12 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/fandreuz/yabm/model/entity"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-func UnassignTagByLabel(request TagAssignationByLabelRequest) error {
+func UnassignTagByLabel(request entity.TagAssignationByLabelRequest) error {
 	conn, connError := openConnection()
 	if connError != nil {
 		return connError
@@ -31,14 +32,14 @@ func UnassignTagByLabel(request TagAssignationByLabelRequest) error {
 		return findTagByLabelErr
 	}
 
-	unassignErr := unassignTag(TagAssignationRequest{TagId: tag.Id, BookmarkId: request.BookmarkId}, tx)
+	unassignErr := unassignTag(entity.TagAssignationRequest{TagId: tag.Id, BookmarkId: request.BookmarkId}, tx)
 	if unassignErr == nil {
 		tx.Commit(context.TODO())
 	}
 	return unassignErr
 }
 
-func UnassignTagById(request TagAssignationRequest) error {
+func UnassignTagById(request entity.TagAssignationRequest) error {
 	conn, connError := openConnection()
 	if connError != nil {
 		return connError
@@ -47,11 +48,11 @@ func UnassignTagById(request TagAssignationRequest) error {
 	return unassignTag(request, conn)
 }
 
-func unassignTag(request TagAssignationRequest, session queryableSession) error {
+func unassignTag(request entity.TagAssignationRequest, session queryableSession) error {
 	sqlInsertQuery := fmt.Sprintf("delete from assigned_tags where tagId = %d AND bookmarkId = %d returning *", request.TagId, request.BookmarkId)
 	handler := func(dbError *pgconn.PgError) error {
 		return handleDatabaseError(dbError)
 	}
-	_, err := execQueryAndReturn[AssignedTag](sqlInsertQuery, session, handler)
+	_, err := execQueryAndReturn[entity.AssignedTag](sqlInsertQuery, session, handler)
 	return err
 }

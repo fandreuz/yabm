@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/fandreuz/yabm/model"
+	"github.com/fandreuz/yabm/model/entity"
 	"github.com/spf13/cobra"
 )
 
@@ -26,10 +27,10 @@ var UntagCmd = &cobra.Command{
 
 		tagId, err := strconv.ParseUint(args[1], 10, 64)
 		if err != nil {
-			request := model.TagAssignationByLabelRequest{TagLabel: args[1], BookmarkId: bookmarkId}
+			request := entity.TagAssignationByLabelRequest{TagLabel: args[1], BookmarkId: bookmarkId}
 			return model.UnassignTagByLabel(request)
 		} else {
-			request := model.TagAssignationRequest{TagId: tagId, BookmarkId: bookmarkId}
+			request := entity.TagAssignationRequest{TagId: tagId, BookmarkId: bookmarkId}
 			return model.UnassignTagById(request)
 		}
 	},

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/fandreuz/yabm/model"
+	"github.com/fandreuz/yabm/model/entity"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +16,7 @@ var AddCmd = &cobra.Command{
 			return fmt.Errorf("'add' expects only one argument")
 		}
 
-		request := model.TagCreationRequest{Label: args[0]}
+		request := entity.TagCreationRequest{Label: args[0]}
 
 		tag, dbErr := model.GetOrCreateTag(request)
 		if dbErr != nil {

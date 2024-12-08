@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/fandreuz/yabm/model/entity"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
@@ -17,7 +18,7 @@ func quoteAndJoin(values []string) string {
 	return strings.Join(mapped, ",")
 }
 
-func ListBookmarks(tagNames []string) ([]Bookmark, error) {
+func ListBookmarks(tagNames []string) ([]entity.Bookmark, error) {
 	conn, connError := openConnection()
 	if connError != nil {
 		return nil, connError
@@ -26,7 +27,7 @@ func ListBookmarks(tagNames []string) ([]Bookmark, error) {
 
 	if len(tagNames) == 0 {
 		selectQuery := fmt.Sprintf("select * from bookmarks")
-		return listEntities[Bookmark](selectQuery, conn)
+		return listEntities[entity.Bookmark](selectQuery, conn)
 	}
 
 	selectTagWhereRhs := quoteAndJoin(tagNames)
@@ -36,17 +37,17 @@ select * from bookmarks where id in (
 		select distinct id from tags where label in (%s)
 	) group by bookmarkId having count(*) = %d
 )`, selectTagWhereRhs, len(tagNames))
-	return listEntities[Bookmark](selectQuery, conn)
+	return listEntities[entity.Bookmark](selectQuery, conn)
 }
 
-func ListTags() ([]Tag, error) {
+func ListTags() ([]entity.Tag, error) {
 	conn, connError := openConnection()
 	if connError != nil {
 		return nil, connError
 	}
 	defer conn.Close(context.TODO())
 
-	return listEntities[Tag]("select * from tags", conn)
+	return listEntities[entity.Tag]("select * from tags", conn)
 }
 
 func listEntities[E any](sqlQuery string, session queryableSession) ([]E, error) {

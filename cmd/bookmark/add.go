@@ -6,6 +6,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/fandreuz/yabm/model"
+	"github.com/fandreuz/yabm/model/entity"
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +43,7 @@ var AddCmd = &cobra.Command{
 			return titleErr
 		}
 
-		request := model.BookmarkCreationRequest{Url: url, Title: title}
+		request := entity.BookmarkCreationRequest{Url: url, Title: title}
 
 		bookmark, dbErr := model.CreateBookmark(request)
 		if dbErr != nil {

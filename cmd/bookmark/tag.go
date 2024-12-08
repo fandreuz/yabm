@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/fandreuz/yabm/model"
+	"github.com/fandreuz/yabm/model/entity"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +27,7 @@ var TagCmd = &cobra.Command{
 
 		tagId, err := strconv.Atoi(args[1])
 		if err != nil {
-			request := model.TagCreationRequest{Label: args[1]}
+			request := entity.TagCreationRequest{Label: args[1]}
 
 			tag, dbErr := model.GetOrCreateTag(request)
 			if dbErr != nil {
@@ -39,7 +40,7 @@ var TagCmd = &cobra.Command{
 			}
 		}
 
-		request := model.TagAssignationRequest{TagId: uint64(tagId), BookmarkId: uint64(bookmarkId)}
+		request := entity.TagAssignationRequest{TagId: uint64(tagId), BookmarkId: uint64(bookmarkId)}
 		model.AssignTag(request)
 
 		return nil

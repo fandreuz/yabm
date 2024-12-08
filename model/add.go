@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/fandreuz/yabm/model/entity"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-func CreateBookmark(request BookmarkCreationRequest) (*Bookmark, error) {
+func CreateBookmark(request entity.BookmarkCreationRequest) (*entity.Bookmark, error) {
 	conn, connError := openConnection()
 	if connError != nil {
 		return nil, connError
@@ -15,16 +16,16 @@ func CreateBookmark(request BookmarkCreationRequest) (*Bookmark, error) {
 	defer conn.Close(context.TODO())
 
 	sqlInsertQuery := fmt.Sprintf("insert into bookmarks (url, title, creationDate) values ('%s', '%s', now()) returning *", request.Url, request.Title)
-	return execQueryAndReturn[Bookmark](sqlInsertQuery, conn, handleDatabaseError)
+	return execQueryAndReturn[entity.Bookmark](sqlInsertQuery, conn, handleDatabaseError)
 }
 
-func findTagByLabel(label string, session queryableSession) (*Tag, error) {
+func findTagByLabel(label string, session queryableSession) (*entity.Tag, error) {
 	sqlSelectQuery := fmt.Sprintf("select * from tags where label = '%s'", label)
-	return execQueryAndReturn[Tag](sqlSelectQuery, session, handleDatabaseError)
+	return execQueryAndReturn[entity.Tag](sqlSelectQuery, session, handleDatabaseError)
 
 }
 
-func GetOrCreateTag(request TagCreationRequest) (*Tag, error) {
+func GetOrCreateTag(request entity.TagCreationRequest) (*entity.Tag, error) {
 	conn, connError := openConnection()
 	if connError != nil {
 		return nil, connError
@@ -43,7 +44,7 @@ func GetOrCreateTag(request TagCreationRequest) (*Tag, error) {
 	}
 
 	sqlInsertQuery := fmt.Sprintf("insert into tags (label, creationDate) values ('%s', now()) returning *", request.Label)
-	tag, insertErr := execQueryAndReturn[Tag](sqlInsertQuery, tx, handleDatabaseError)
+	tag, insertErr := execQueryAndReturn[entity.Tag](sqlInsertQuery, tx, handleDatabaseError)
 	if insertErr != nil {
 		return nil, insertErr
 	}
@@ -52,7 +53,7 @@ func GetOrCreateTag(request TagCreationRequest) (*Tag, error) {
 	return tag, nil
 }
 
-func AssignTag(request TagAssignationRequest) (*AssignedTag, error) {
+func AssignTag(request entity.TagAssignationRequest) (*entity.AssignedTag, error) {
 	conn, connError := openConnection()
 	if connError != nil {
 		return nil, connError
@@ -66,5 +67,5 @@ func AssignTag(request TagAssignationRequest) (*AssignedTag, error) {
 		}
 		return handleDatabaseError(dbError)
 	}
-	return execQueryAndReturn[AssignedTag](sqlInsertQuery, conn, handler)
+	return execQueryAndReturn[entity.AssignedTag](sqlInsertQuery, conn, handler)
 }
