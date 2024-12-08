@@ -106,6 +106,10 @@ func DeleteTagByLabel(label string) error {
 	if findErr != nil {
 		return findErr
 	}
+	if tag == nil {
+		// Tag not found, nothing to do
+		return nil
+	}
 
 	if err := deleteTagById(tag.Id, tx); err != nil {
 		return err

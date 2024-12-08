@@ -11,11 +11,15 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
+// Errors of type ErrNoRows are not forwarded
 func findTagByLabel(label string, session queryableSession) (*entity.Tag, error) {
 	sqlSelectQuery := fmt.Sprintf("select * from %s where label = '%s'", tagsTable, label)
 	tag, err := execQueryAndReturn[entity.Tag](sqlSelectQuery, session, handleDatabaseError)
-	if tag != nil || errors.Is(err, pgx.ErrNoRows) {
+	if tag != nil {
 		return tag, nil
+	}
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
 	}
 	return nil, err
 }
