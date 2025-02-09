@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -14,7 +13,7 @@ type Bookmark struct {
 }
 
 func (b Bookmark) String() string {
-	return fmt.Sprintf("{id: '%d', url: '%s', title: '%v', creationDate: '%s'}", b.Id, b.Url, b.Title, b.CreationDate)
+	return EntityToString(b)
 }
 
 type BookmarkCreationRequest struct {

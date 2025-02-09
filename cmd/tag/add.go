@@ -1,7 +1,6 @@
 package tag
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/fandreuz/yabm/model"
@@ -19,12 +18,7 @@ var AddCmd = &cobra.Command{
 			if dbErr != nil {
 				return dbErr
 			}
-
-			b, jsonErr := json.Marshal(tag)
-			if jsonErr != nil {
-				return jsonErr
-			}
-			fmt.Println(string(b))
+			fmt.Println(tag.String())
 		}
 		return nil
 	},

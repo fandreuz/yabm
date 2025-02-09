@@ -1,7 +1,6 @@
 package tag
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/fandreuz/yabm/model"
@@ -19,11 +18,7 @@ var ListCmd = &cobra.Command{
 		}
 
 		for _, t := range entities {
-			b, jsonErr := json.Marshal(t)
-			if jsonErr != nil {
-				return jsonErr
-			}
-			fmt.Printf("%s\n", string(b))
+			fmt.Printf("%s\n", t.String())
 		}
 
 		return nil

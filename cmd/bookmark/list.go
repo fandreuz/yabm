@@ -1,7 +1,6 @@
 package bookmark
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/fandreuz/yabm/model"
@@ -34,11 +33,7 @@ var ListCmd = &cobra.Command{
 		}
 
 		for _, b := range bookmarks {
-			b, err := json.Marshal(b)
-			if err != nil {
-				return err
-			}
-			fmt.Println(string(b))
+			fmt.Println(b.String())
 		}
 
 		return nil

@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -13,7 +12,7 @@ type Tag struct {
 }
 
 func (t Tag) String() string {
-	return fmt.Sprintf("{id: '%d', label: '%s', creationDate: '%s'}", t.Id, t.Label, t.CreationDate)
+	return EntityToString(t)
 }
 
 type TagCreationRequest struct {
