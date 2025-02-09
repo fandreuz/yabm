@@ -49,7 +49,7 @@ var AddCmd = &cobra.Command{
 			return dbErr
 		}
 
-		b, jsonErr := json.Marshal(bookmark)
+		b, jsonErr := json.MarshalIndent(bookmark, "", "  ")
 		if jsonErr != nil {
 			return jsonErr
 		}

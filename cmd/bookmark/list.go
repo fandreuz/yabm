@@ -34,11 +34,11 @@ var ListCmd = &cobra.Command{
 		}
 
 		for _, b := range bookmarks {
-			b, err := json.Marshal(b)
+			b, err := json.MarshalIndent(b, "", "  ")
 			if err != nil {
 				return err
 			}
-			fmt.Println(string(b))
+			fmt.Print(string(b))
 		}
 
 		return nil
