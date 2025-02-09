@@ -20,7 +20,7 @@ var AddCmd = &cobra.Command{
 				return dbErr
 			}
 
-			b, jsonErr := json.MarshalIndent(tag, "", "  ")
+			b, jsonErr := json.Marshal(tag)
 			if jsonErr != nil {
 				return jsonErr
 			}

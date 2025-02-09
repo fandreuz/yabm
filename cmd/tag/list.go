@@ -19,7 +19,7 @@ var ListCmd = &cobra.Command{
 		}
 
 		for _, t := range entities {
-			b, jsonErr := json.MarshalIndent(t, "", "  ")
+			b, jsonErr := json.Marshal(t)
 			if jsonErr != nil {
 				return jsonErr
 			}
