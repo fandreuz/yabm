@@ -26,3 +26,5 @@ go.work.sum
 
 .vscode
 .postgres-data
+dev/db.out
+dev/db.err
