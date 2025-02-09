@@ -10,16 +10,16 @@ import (
 )
 
 func GetBookmarkById(id uint64) (entity.Bookmark, error) {
-	sqlQuery := fmt.Sprintf("select * from %s where id=%d", bookmarksTable, id)
-	return getById[entity.Bookmark](sqlQuery)
+	sqlQuery := fmt.Sprintf("select * from %s where id=@id", bookmarksTable)
+	return getById[entity.Bookmark](sqlQuery, pgx.NamedArgs{"id": id})
 }
 
 func GetTagById(id uint64) (entity.Tag, error) {
-	sqlQuery := fmt.Sprintf("select * from %s where id=%d", tagsTable, id)
-	return getById[entity.Tag](sqlQuery)
+	sqlQuery := fmt.Sprintf("select * from %s where id=@id", tagsTable)
+	return getById[entity.Tag](sqlQuery, pgx.NamedArgs{"id": id})
 }
 
-func getById[E any](sqlQuery string) (E, error) {
+func getById[E any](sqlQuery string, namedArgs pgx.NamedArgs) (E, error) {
 	var errorEntity E
 
 	conn, connError := openConnection()
@@ -28,7 +28,7 @@ func getById[E any](sqlQuery string) (E, error) {
 	}
 	defer conn.Close(context.TODO())
 
-	rows, queryErr := conn.Query(context.TODO(), sqlQuery)
+	rows, queryErr := conn.Query(context.TODO(), sqlQuery, namedArgs)
 	if queryErr != nil {
 		if pgErr, ok := queryErr.(*pgconn.PgError); ok {
 			return errorEntity, handleDatabaseError(pgErr)

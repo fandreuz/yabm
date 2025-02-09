@@ -27,17 +27,16 @@ func ListBookmarks(tagNames []string) ([]entity.Bookmark, error) {
 
 	if len(tagNames) == 0 {
 		selectQuery := fmt.Sprintf("select * from %s", bookmarksTable)
-		return listEntities[entity.Bookmark](selectQuery, conn)
+		return listEntities[entity.Bookmark](conn, selectQuery, pgx.NamedArgs{})
 	}
 
-	selectTagWhereRhs := quoteAndJoin(tagNames)
 	selectQuery := fmt.Sprintf(`
 select * from %s where id in (
 	select bookmarkId from %s where tagId in (
-		select distinct id from %s where label in (%s)
-	) group by bookmarkId having count(*) = %d
-)`, bookmarksTable, assignedTagsTable, tagsTable, selectTagWhereRhs, len(tagNames))
-	return listEntities[entity.Bookmark](selectQuery, conn)
+		select distinct id from %s where label in (@selectedTags)
+	) group by bookmarkId having count(*) = @tagsCount
+)`, bookmarksTable, assignedTagsTable, tagsTable)
+	return listEntities[entity.Bookmark](conn, selectQuery, pgx.NamedArgs{"selectedTags": quoteAndJoin(tagNames), "tagsCount": len(tagNames)})
 }
 
 func ListTags() ([]entity.Tag, error) {
@@ -47,11 +46,11 @@ func ListTags() ([]entity.Tag, error) {
 	}
 	defer conn.Close(context.TODO())
 
-	return listEntities[entity.Tag]("select * from tags", conn)
+	return listEntities[entity.Tag](conn, "select * from tags", pgx.NamedArgs{})
 }
 
-func listEntities[E any](sqlQuery string, session queryableSession) ([]E, error) {
-	rows, queryErr := session.Query(context.TODO(), sqlQuery)
+func listEntities[E any](session queryableSession, sqlQuery string, namedArgs pgx.NamedArgs) ([]E, error) {
+	rows, queryErr := session.Query(context.TODO(), sqlQuery, namedArgs)
 	if queryErr != nil {
 		if pgErr, ok := queryErr.(*pgconn.PgError); ok {
 			return nil, handleDatabaseError(pgErr)

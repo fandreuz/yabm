@@ -50,8 +50,8 @@ func UnassignTagById(request entity.TagAssignationRequest) error {
 }
 
 func deleteAssignedTags(id uint64, columnName string, session queryableSession) error {
-	whereClause := fmt.Sprintf("where %s = %d", columnName, id)
-	return deleteEntity(assignedTagsTable, whereClause, session)
+	whereClause := fmt.Sprintf("where %s = @id", columnName)
+	return deleteEntity(session, whereClause, assignedTagsTable, pgx.NamedArgs{"id": id})
 }
 
 func DeleteBookmarkById(id uint64) error {
@@ -71,8 +71,8 @@ func DeleteBookmarkById(id uint64) error {
 		return err
 	}
 
-	whereClause := fmt.Sprintf("where id = %d", id)
-	if err := deleteEntity(bookmarksTable, whereClause, tx); err != nil {
+	whereClause := "where id = @id"
+	if err := deleteEntity(tx, whereClause, bookmarksTable, pgx.NamedArgs{"id": id}); err != nil {
 		return err
 	}
 
@@ -85,8 +85,8 @@ func deleteTagById(id uint64, session queryableSession) error {
 		return err
 	}
 
-	whereClause := fmt.Sprintf("where id = %d", id)
-	return deleteEntity(tagsTable, whereClause, session)
+	whereClause := "where id = @id"
+	return deleteEntity(session, whereClause, tagsTable, pgx.NamedArgs{"id": id})
 }
 
 func DeleteTagByLabel(label string) error {
@@ -141,13 +141,13 @@ func DeleteTagById(id uint64) error {
 }
 
 func unassignTag(request entity.TagAssignationRequest, session queryableSession) error {
-	whereClause := fmt.Sprintf("where tagId = %d AND bookmarkId = %d", request.TagId, request.BookmarkId)
-	return deleteEntity(assignedTagsTable, whereClause, session)
+	whereClause := "where tagId = @tagId AND bookmarkId = @bookmarkId"
+	return deleteEntity(session, whereClause, assignedTagsTable, pgx.NamedArgs{"tagId": request.TagId, "bookmarkId": request.BookmarkId})
 }
 
-func deleteEntity(table string, whereClause string, session queryableSession) error {
+func deleteEntity(session queryableSession, whereClause string, table string, namedArgs pgx.NamedArgs) error {
 	sqlQuery := fmt.Sprintf("delete from %s %s", table, whereClause)
-	if err := execQuery(sqlQuery, session); err != nil {
+	if err := execQuery(sqlQuery, session, namedArgs); err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
 			return handleDatabaseError(pgErr)
 		}

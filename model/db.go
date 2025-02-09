@@ -28,8 +28,8 @@ func handleDatabaseError(pgErr *pgconn.PgError) error {
 	panic(fmt.Errorf("DB error occurred, code: %s, message: '%s', details: '%s'", pgErr.Code, pgErr.Message, pgErr.Detail))
 }
 
-func execQueryAndReturn[T any](sqlInsertQuery string, session queryableSession, handler databaseErrorHandler) (*T, error) {
-	rows, dbInsertErr := session.Query(context.TODO(), sqlInsertQuery)
+func execQueryAndReturn[T any](session queryableSession, handler databaseErrorHandler, sqlInsertQuery string, args ...pgx.NamedArgs) (*T, error) {
+	rows, dbInsertErr := session.Query(context.TODO(), sqlInsertQuery, args)
 	if dbInsertErr != nil {
 		if pgErr, ok := dbInsertErr.(*pgconn.PgError); ok {
 			return nil, handler(pgErr)
@@ -48,8 +48,8 @@ func execQueryAndReturn[T any](sqlInsertQuery string, session queryableSession, 
 	return &mappedRows, nil
 }
 
-func execQuery(sqlInsertQuery string, session queryableSession) error {
-	rows, dbInsertErr := session.Query(context.TODO(), sqlInsertQuery)
+func execQuery(sqlInsertQuery string, session queryableSession, args ...pgx.NamedArgs) error {
+	rows, dbInsertErr := session.Query(context.TODO(), sqlInsertQuery, args)
 	if dbInsertErr != nil {
 		return dbInsertErr
 	}

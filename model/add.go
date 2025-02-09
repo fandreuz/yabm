@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/fandreuz/yabm/model/entity"
 	"github.com/jackc/pgx/v5"
@@ -13,8 +12,8 @@ import (
 
 // Errors of type ErrNoRows are not forwarded
 func findTagByLabel(label string, session queryableSession) (*entity.Tag, error) {
-	sqlSelectQuery := fmt.Sprintf("select * from %s where label = '%s'", tagsTable, label)
-	tag, err := execQueryAndReturn[entity.Tag](sqlSelectQuery, session, handleDatabaseError)
+	query := fmt.Sprintf("select * from %s where label = '@label'", tagsTable)
+	tag, err := execQueryAndReturn[entity.Tag](session, handleDatabaseError, query, pgx.NamedArgs{"label": label})
 	if tag != nil {
 		return tag, nil
 	}
@@ -30,19 +29,19 @@ func getOrCreateTag(request entity.TagCreationRequest, tx pgx.Tx) (*entity.Tag, 
 		return tag, findTagByLabelErr
 	}
 
-	sqlInsertQuery := fmt.Sprintf("insert into %s (label, creationDate) values ('%s', now()) returning *", tagsTable, request.Label)
-	return execQueryAndReturn[entity.Tag](sqlInsertQuery, tx, handleDatabaseError)
+	query := fmt.Sprintf("insert into %s (label, creationDate) values ('@label', now()) returning *", tagsTable)
+	return execQueryAndReturn[entity.Tag](tx, handleDatabaseError, query, pgx.NamedArgs{"label": request.Label})
 }
 
 func assignTagById(request entity.TagAssignationRequest, session queryableSession) (*entity.AssignedTag, error) {
-	sqlInsertQuery := fmt.Sprintf("insert into %s (tagId, bookmarkId) values (%d, %d) returning *", assignedTagsTable, request.TagId, request.BookmarkId)
+	query := fmt.Sprintf("insert into %s (tagId, bookmarkId) values (@tagId, @bookmarkId) returning *", tagsTable)
 	handler := func(dbError *pgconn.PgError) error {
 		if dbError.Code == "23505" {
 			return nil
 		}
 		return handleDatabaseError(dbError)
 	}
-	return execQueryAndReturn[entity.AssignedTag](sqlInsertQuery, session, handler)
+	return execQueryAndReturn[entity.AssignedTag](session, handler, query, pgx.NamedArgs{"tagId": request.TagId, "bookmarkId": request.BookmarkId})
 }
 
 func CreateBookmark(request entity.BookmarkCreationRequest) (*entity.Bookmark, error) {
@@ -52,9 +51,8 @@ func CreateBookmark(request entity.BookmarkCreationRequest) (*entity.Bookmark, e
 	}
 	defer conn.Close(context.TODO())
 
-	sanitizedTitle := strings.Replace(request.Title, "'", "''", -1)
-	sqlInsertQuery := fmt.Sprintf("insert into %s (url, title, creationDate) values ('%s', '%s', now()) returning *", bookmarksTable, request.Url, sanitizedTitle)
-	return execQueryAndReturn[entity.Bookmark](sqlInsertQuery, conn, handleDatabaseError)
+	query := fmt.Sprintf("insert into %s (url, title, creationDate) values ('@url', '@title', now()) returning *", bookmarksTable)
+	return execQueryAndReturn[entity.Bookmark](conn, handleDatabaseError, query, pgx.NamedArgs{"url": request.Url, "title": request.Title})
 }
 
 func GetOrCreateTag(request entity.TagCreationRequest) (*entity.Tag, error) {
