@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -23,7 +24,11 @@ func MakeShowCommand[E fmt.Stringer](extractor func(uint64) (E, error)) *cobra.C
 				return dbErr
 			}
 
-			fmt.Println(e)
+			b, jsonErr := json.Marshal(e)
+			if jsonErr != nil {
+				return jsonErr
+			}
+			fmt.Printf("%s", string(b))
 			return nil
 		},
 	}
